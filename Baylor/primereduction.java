@@ -1,3 +1,5 @@
+import Baylor.Kattio;
+
 import java.io.*;
 import java.util.StringTokenizer;
 
@@ -76,6 +78,7 @@ public class primereduction {
 
 }
 
+/*
 class Kattio extends PrintWriter {
     public Kattio(InputStream i) {
         super(new BufferedOutputStream(System.out));
@@ -131,4 +134,4 @@ class Kattio extends PrintWriter {
         token = null;
         return ans;
     }
-}
+}*/

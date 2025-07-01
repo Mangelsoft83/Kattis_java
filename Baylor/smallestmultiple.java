@@ -30,8 +30,6 @@ public class smallestmultiple {
             long prime = 1;
             boolean isAllOnes = false;
 
-
-
             while (!isAllOnes){
                 prime = primeGen.nextPrime(prime);
                 boolean isDivided = false;
