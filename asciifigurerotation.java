@@ -16,7 +16,7 @@ public class asciifigurerotation {
     dict.put('+', '+');
     dict.put(' ', ' ');
 
-    FastReader fr = new FastReader();
+    FastReaderAscii fr = new FastReaderAscii();
 
     String line;
     boolean first = true;
@@ -80,7 +80,7 @@ public class asciifigurerotation {
 
 }
 
-class FastReader {
+class FastReaderAscii {
   private final InputStream in = System.in;
   private final byte[] buffer = new byte[1 << 16];
   private int ptr = 0, len = 0;

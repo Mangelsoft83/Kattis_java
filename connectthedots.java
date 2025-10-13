@@ -4,7 +4,7 @@ import java.util.*;
 
 public class connectthedots {
   public static void main(final String[] args) throws IOException {
-    final FastReader fr = new FastReader();
+    final FastReaderConnectTheDots fr = new FastReaderConnectTheDots();
 
     final List<String> values = new ArrayList<>();
     String line;
@@ -107,7 +107,7 @@ public class connectthedots {
 
 }
 
-class FastReader {
+class FastReaderConnectTheDots {
   private final InputStream in = System.in;
   private final byte[] buffer = new byte[1 << 16];
   private int ptr = 0, len = 0;

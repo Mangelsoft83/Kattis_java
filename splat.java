@@ -1,7 +1,3 @@
-
-import java.io.*;
-import java.util.StringTokenizer;
-
 public class splat {
   public static void main(String[] args) {
     Kattio scanner = new Kattio(System.in);
