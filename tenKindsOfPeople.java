@@ -1,158 +1,92 @@
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class tenKindsOfPeople {
-
-  static boolean[][] grid;
-  static int r, c, n;
-  static List<int[]> starts, stops;
-
   public static void main(String[] args) throws IOException {
 
-    FastReaderTena n = new FastReaderTena();
+    FastReaderTena in = new FastReaderTena();
 
-    List<String> lines = new ArrayList<>();
+    String[] rc_split = in.readLine().split(" ");
+    int R = Integer.parseInt(rc_split[0]);
+    int C = Integer.parseInt(rc_split[1]);
 
-    String l = "";
-    while ((l = n.readLine()) != null) {
-      lines.add(l);
-    }
+    boolean[][] grid = new boolean[R][C];
 
-    proces(lines);
-
-  }
-
-  private static void proces(List<String> lines) {
-    // init
-    // read grid
-    readGrid(lines);
-    // read coordinates
-    readCoordinates(lines);
-    // printGrid();
-    // solve
-    solve();
-  }
-
-  private static void solve() {
-    for (int i = 0; i < n; i++) {
-      int[] start = starts.get(i);
-      int[] stop = stops.get(i);
-
-      if (grid[start[0]][start[1]] != grid[stop[0]][stop[1]]) {
-        System.out.println("neither");
-      } else if (grid[start[0]][start[1]] && grid[stop[0]][stop[1]]) {
-        System.out.println(route(start, stop, true) ? "decimal" : "neither");
-      } else if (!grid[start[0]][start[1]] && !grid[stop[0]][stop[1]]) {
-        System.out.println(route(start, stop, false) ? "binary" : "neither");
+    for (int r = 0; r < R; r++) {
+      char[] line = in.readLine().toCharArray();
+      for (int c = 0; c < C; c++) {
+        grid[r][c] = line[c] == '1';
       }
     }
-  }
 
-  private static boolean route(int[] start, int[] stop, boolean type) {
+    int[] dr = new int[] { 0, 0, 1, -1 };
+    int[] dc = new int[] { 1, -1, 0, 0 };
 
-    List<int[]> q = new ArrayList<>();
-    HashSet<String> closed = new HashSet<>();
+    int id = 0;
 
-    List<int[]> dirs = List.of(
-        new int[] { 0, 1 }, new int[] { 0, -1 }, new int[] { 1, 0 }, new int[] { -1, 0 });
+    int[][] map = new int[R][C];
+    for (int[] row : map)
+      Arrays.fill(row, -1);
 
-    q.add(start);
+    List<Boolean> typeList = new ArrayList<>();
 
-    String endKey = getKey(stop);
+    for (int r = 0; r < R; r++) {
+      for (int c = 0; c < C; c++) {
 
-    while (!q.isEmpty()) {
-      // System.out.println("q size is: " + q.size());
+        if (map[r][c] != -1)
+          continue;
 
-      int[] act = q.removeFirst();
+        boolean sign = grid[r][c];
 
-      closed.add(getKey(act));
-      if (endKey.equals(getKey(act)))
-        return true;
+        typeList.add(sign);
 
-      // System.out.println(Arrays.toString(act));
-      for (int[] dir : dirs) {
-        int rr = act[0] + dir[0];
-        int cc = act[1] + dir[1];
+        ArrayDeque<int[]> q = new ArrayDeque<>();
+        q.add(new int[] { r, c });
 
-        int[] newCord = new int[] { rr, cc };
+        map[r][c] = id;
 
-        String newKey = getKey(newCord);
+        while (!q.isEmpty()) {
+          int[] act = q.pollFirst();
 
-        if (newKey.equals(endKey))
-          return true;
+          for (int i = 0; i < 4; i++) {
 
-        if (isValid(rr, cc) && grid[rr][cc] == type && !closed.contains(newKey)) {
-          q.addFirst(newCord);
+            int newR = act[0] + dr[i];
+            int newC = act[1] + dc[i];
 
+            if (newR < 0 || newR >= R || newC < 0 || newC >= C || grid[newR][newC] != sign)
+              continue;
+
+            if (map[newR][newC] != -1)
+              continue;
+
+            q.addLast(new int[] { newR, newC });
+            map[newR][newC] = id;
+          }
         }
 
-      }
+        id++;
 
-    }
-
-    return false;
-  }
-
-  private static boolean isValid(int rr, int cc) {
-    return rr >= 0 && rr < r && cc >= 0 && cc < c;
-  }
-
-  private static String getKey(int[] arr) {
-    return Arrays.toString(arr);
-  }
-
-  private static void readCoordinates(List<String> lines) {
-    starts = new ArrayList<>();
-    stops = new ArrayList<>();
-
-    n = Integer.parseInt(lines.get(r + 1));
-
-    for (int i = 0; i < n; i++) {
-      String[] split = lines.get(i + r + 2).split(" ");
-      int[] start = new int[] { Integer.parseInt(split[0]) - 1, Integer.parseInt(split[1]) - 1 };
-      int[] stop = new int[] { Integer.parseInt(split[2]) - 1, Integer.parseInt(split[3]) - 1 };
-      starts.add(start);
-      stops.add(stop);
-    }
-
-  }
-
-  private static void printGrid() {
-    for (boolean[] row : grid) {
-      for (boolean val : row) {
-        System.out.print(val ? "1 " : "0 ");
-      }
-      System.out.println();
-    }
-
-    System.out.println("Coordinates");
-
-    for (int i = 0; i < n; i++) {
-      int[] start = starts.get(i);
-      int[] stop = stops.get(i);
-
-      System.out.println("[" + start[0] + " " + start[1] + "] [" + stop[0] + " " + stop[1] + "]");
-    }
-
-  }
-
-  private static void readGrid(List<String> lines) {
-    r = Integer.parseInt(lines.getFirst().split(" ")[0]);
-    c = Integer.parseInt(lines.getFirst().split(" ")[1]);
-
-    grid = new boolean[r][c];
-
-    for (int i = 0; i < r; i++) {
-      for (int j = 0; j < c; j++) {
-        grid[i][j] = lines.get(i + 1).charAt(j) == '1';
       }
     }
-  }
 
+    int N = Integer.parseInt(in.readLine());
+
+    for (int n = 0; n < N; n++) {
+      String[] coordSplit = in.readLine().split(" ");
+      int r1 = Integer.parseInt(coordSplit[0]) - 1;
+      int c1 = Integer.parseInt(coordSplit[1]) - 1;
+      int r2 = Integer.parseInt(coordSplit[2]) - 1;
+      int c2 = Integer.parseInt(coordSplit[3]) - 1;
+
+      if (map[r1][c1] == map[r2][c2]) {
+        boolean type = typeList.get(map[r1][c1]);
+        System.out.println(type ? "decimal" : "");
+      } else
+        System.out.println("neither");
+
+    }
+  }
 }
 
 class FastReaderTena {
