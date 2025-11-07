@@ -14,6 +14,7 @@ class pathTracing {
     String line;
 
     int x = 0, y = 0;
+    path.add(new int[] { 0, 0 });
     while ((line = in.readLine()) != null) {
       // Each move is one of left, right, up or down.
       if (line.equals("left"))
@@ -21,40 +22,60 @@ class pathTracing {
       else if (line.equals("right"))
         x++;
       else if (line.equals("up"))
-        y++;
-      else if (line.equals("down"))
         y--;
+      else if (line.equals("down"))
+        y++;
 
-      path.add(new int[] { x, y });
+      path.add(new int[] { y, x });
     }
 
-    int xMin = Integer.MAX_VALUE;
-    int xMax = Integer.MIN_VALUE;
-    int yMin = Integer.MAX_VALUE;
-    int yMax = Integer.MIN_VALUE;
+    int gMin = Integer.MAX_VALUE;
+    int gMax = Integer.MIN_VALUE;
+    int cMin = Integer.MAX_VALUE;
+    int cMax = Integer.MIN_VALUE;
 
     for (int[] a : path) {
-      xMin = Math.min(xMin, a[0]);
-      xMax = Math.max(xMax, a[0]);
-      yMin = Math.min(yMin, a[1]);
-      yMax = Math.max(yMax, a[1]);
+      gMin = Math.min(gMin, a[0]);
+      gMax = Math.max(gMax, a[0]);
+      cMin = Math.min(cMin, a[1]);
+      cMax = Math.max(cMax, a[1]);
     }
 
     for (int[] p : path) {
-      p[0] = p[0] - xMin + 1;
-      p[1] = p[1] - yMin + 1;
+      p[0] = p[0] - gMin + 1;
+      p[1] = p[1] - cMin + 1;
     }
 
-    int R = yMax - yMin + 3;
-    int C = xMax - xMin + 3;
+    int C = cMax - cMin + 3;
+    int R = gMax - gMin + 3;
 
     char[][] grid = new char[R][C];
 
-    for (char[] l : grid)
-      Arrays.fill(l, '#');
+    // Border
+    for (int i = 0; i < R; i++) {
+      char[] l = grid[i];
+      if (i == 0 || i == (R - 1))
+        Arrays.fill(l, '#');
+      else {
+        Arrays.fill(l, ' ');
+        l[0] = '#';
+        l[C - 1] = '#';
+      }
+    }
+
+    for (int[] p : path) {
+      int r = p[0];
+      int c = p[1];
+      grid[r][c] = '*';
+    }
+
+    int[] s = path.getFirst();
+    int[] e = path.getLast();
+    grid[s[0]][s[1]] = 'S';
+    grid[e[0]][e[1]] = 'E';
 
     for (char[] l : grid)
-      System.out.println(Arrays.toString(l));
+      System.out.println(new String(l));
   }
 }
 
