@@ -1,114 +1,116 @@
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map.Entry;
 
 public class addingwords {
-    static HashMap<Integer, String> values2dict = new HashMap<>();
-    static HashMap<String, Integer> dict2values = new HashMap<>();
+  private static HashMap<String, Integer> map = new HashMap<>();
 
-    static void main(String[] args) throws IOException {
-        FastReaderAddingWords fr = new FastReaderAddingWords();
-        List<String> textList = new ArrayList<>();
+  public static void main(String[] args) throws IOException {
+    FastReaderAddingWords in = new FastReaderAddingWords();
 
-        String line;
-        while((line = fr.readLine()) != null) {
-            textList.add(line);
-        }
+    String line;
+    while ((line = in.readLine()) != null) {
 
-        proces(textList);
-    }
+      String[] split = line.split(" ");
+      String cmd = split[0];
 
-    private static void proces(List<String> textList) {
-        for(String line : textList) {
-            if (line.startsWith("def")) {
-                procesDef(line);
-            } else if (line.startsWith("clear")) {
-                values2dict.clear();
-            } else if (line.startsWith("calc")) {
-                procesCalc(line);
-            }
-        }
-
-    }
-
-    private static void procesDef(String line) {
-        String[] split = line.split(" ");
-        String name = split[1];
+      if (cmd.equals("def")) {
+        String key = split[1];
         int value = Integer.parseInt(split[2]);
-        values2dict.put(value, name);
-        dict2values.put(name, value);
-    }
+        map.put(key, value);
+      } else if (cmd.equals("clear")) {
+        map.clear();
+      } else if (cmd.equals("calc")) {
+        int sum = 0;
+        StringBuilder sb = new StringBuilder();
+        boolean isOk = true;
+        Integer val = 0;
+        String opp = "+";
 
-    private static void procesCalc(String line) {
-        String l = line.replaceAll("calc", "").trim();
-        String[] split = l.split(" ");
-        int act = 0;
-        int temp;
-        char opperator = ' ';
+        for (int i = 1; i < split.length; i++) {
+          sb.append(split[i]).append(" ");
 
-        for(String word : split) {
-            switch (word) {
-                case "+" -> opperator = '+';
-                case "-" -> opperator = '-';
-                case "=" -> {
-                    System.out.println(l + " " + values2dict.getOrDefault(act, "unknown"));
-                    opperator = ' ';
-                }
-                default -> {
-                    if (!dict2values.containsKey(word)) {
-                        System.out.println(l + " unknown");
-                        return;
-                    }
+          if (!isOk)
+            continue;
 
-                    temp = dict2values.get(word);
-                    if (opperator == '+') {
-                        act += temp;
-                        opperator = ' ';
-                    } else if (opperator == '-') {
-                        act -= temp;
-                    } else {
-                        act = temp;
-                    }
-                }
+          boolean odd = (i % 2) == 1;
+
+          if (odd) { // get value
+
+            String key = split[i];
+            val = map.get(key);
+            if (val == null) {
+              isOk = false;
+              continue;
             }
+
+            if (opp.equals("+"))
+              sum += val;
+            if (opp.equals("-"))
+              sum -= val;
+
+          } else { // do calculation
+            opp = split[i];
+          }
+
         }
 
+        if (isOk) { // look for the var name
+          String answer = "unknown";
+
+          for (Entry<String, Integer> e : map.entrySet()) {
+            if (sum == e.getValue()) {
+              answer = e.getKey();
+              break;
+            }
+          }
+
+          sb.append(answer);
+
+        } else {
+          sb.append("unknown");
+        }
+
+        System.out.println(sb.toString());
+
+      }
     }
+  }
+
 }
 
 class FastReaderAddingWords {
-    private final InputStream in = System.in;
-    private final byte[] buffer = new byte[1 << 16];
-    private int ptr = 0, len = 0;
+  private final InputStream in = System.in;
+  private final byte[] buffer = new byte[1 << 16];
+  private int ptr = 0, len = 0;
 
-    public String readLine() throws IOException {
-        int c;
-        final StringBuilder sb = new StringBuilder();
-        boolean seenChar = false;
+  public String readLine() throws IOException {
+    int c;
+    final StringBuilder sb = new StringBuilder();
+    boolean seenChar = false;
 
-        while ((c = read()) != -1) {
-            if (c == '\n')
-                break;
-            if (c == '\r')
-                continue; // skip carriage return
-            sb.append((char) c);
-            seenChar = true;
-        }
-
-        if (!seenChar && c == -1)
-            return null; // true EOF
-        return sb.toString();
+    while ((c = read()) != -1) {
+      if (c == '\n')
+        break;
+      if (c == '\r')
+        continue; // skip carriage return
+      sb.append((char) c);
+      seenChar = true;
     }
 
-    private int read() throws IOException {
-        if (ptr >= len) {
-            ptr = 0;
-            len = in.read(buffer);
-            if (len <= 0)
-                return -1;
-        }
-        return buffer[ptr++];
+    if (!seenChar && c == -1)
+      return null; // true EOF
+    return sb.toString();
+  }
+
+  private int read() throws IOException {
+    if (ptr >= len) {
+      ptr = 0;
+      len = in.read(buffer);
+      if (len <= 0)
+        return -1;
     }
+    return buffer[ptr++];
+  }
 }
