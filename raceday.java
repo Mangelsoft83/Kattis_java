@@ -10,13 +10,18 @@ public class raceday {
     String l;
     int N = 0;
     while ((l = in.readLine()) != null) {
-      if (!first)
+      List<runner> runnerList = new ArrayList<>();
+      int start = 0;
+      if (!first) {
         System.out.println();
-      else
+        String[] split = l.split(" ");
+        runnerList.add(new runner(split[0], split[1], split[2]));
+        start = 1;
+      } else
         N = Integer.parseInt(l);
 
-      List<runner> runnerList = new ArrayList<>();
-      for (int i = 0; i < N; i++) {
+      // System.out.println(N);
+      for (int i = start; i < N; i++) {
         String[] split = in.readLine().split(" ");
         runnerList.add(new runner(split[0], split[1], split[2]));
       }
@@ -27,9 +32,10 @@ public class raceday {
         String location = split[1];
         String time = split[2];
 
+        // System.out.println(Arrays.toString(split));
         runner r = null;
         for (runner rr : runnerList) {
-          if (rr.getBib().equals(bib)) {
+          if (rr.bib.equals(bib)) {
             r = rr;
             break;
           }
@@ -45,12 +51,69 @@ public class raceday {
 
       }
 
+      // Sorting
       runnerList.sort(Comparator.comparing(runner::getName));
+
+      List<runner> s1List = new ArrayList<>(runnerList);
+      s1List.sort((a, b) -> Integer.compare(a.s1, b.s1));
+
+      for (int i = 0; i < s1List.size(); i++) {
+        runner r = s1List.get(i);
+        r.rankS1 = 1 + i;
+      }
+
+      int tempTime = -1;
+      int tempRank = -1;
+      for (runner r : s1List) {
+        if (r.s1 == tempTime)
+          r.rankS1 = tempRank;
+        tempTime = r.s1;
+        tempRank = r.rankS1;
+      }
+
+      List<runner> s2List = new ArrayList<>(runnerList);
+      s2List.sort((a, b) -> Integer.compare(a.s2, b.s2));
+
+      for (int i = 0; i < s2List.size(); i++) {
+        runner r = s2List.get(i);
+        r.rankS2 = 1 + i;
+      }
+
+      tempTime = -1;
+      tempRank = -1;
+      for (runner r : s2List) {
+        if (r.s2 == tempTime)
+          r.rankS2 = tempRank;
+        tempTime = r.s2;
+        tempRank = r.rankS2;
+      }
+
+      List<runner> finList = new ArrayList<>(runnerList);
+      finList.sort((a, b) -> Integer.compare(a.fin, b.fin));
+
+      for (int i = 0; i < finList.size(); i++) {
+        runner r = finList.get(i);
+        r.rankFin = 1 + i;
+      }
+
+      tempTime = -1;
+      tempRank = -1;
+      for (runner r : finList) {
+        if (r.fin == tempTime)
+          r.rankFin = tempRank;
+        tempTime = r.fin;
+        tempRank = r.rankFin;
+      }
+
+      // printing
+      String fmt = "%-25s %4s %9s %9s %9s %9s %9s %9s%n";
+      String fmt2 = "%-24s %4s %9s %9s %9s %9s %9s %9s%n";
+      System.out.printf(fmt, "NAME", "BIB", "SPLIT1", "RANK", "SPLIT2", "RANK", "FINISH", "RANK");
 
       for (runner r : runnerList) {
         System.out.printf(
-            "%-25s %-6s %10s%n",
-            r.getName(), r.getBib(), r.getSplit1());
+            fmt2,
+            r.getName(), r.bib, r.getSplit1(), r.rankS1, r.getSplit2(), r.rankS2, r.getFinal(), r.rankFin);
 
         // System.out.printf(
         // "%-25s %-6s %10s %8d %10s %8d %10s %8d%n",
@@ -61,6 +124,7 @@ public class raceday {
 
       first = false;
     }
+    System.out.println();
 
   }
 
@@ -68,7 +132,7 @@ public class raceday {
 
 class runner {
   String firstName, lastName, bib;
-  int s1, s2, fin;
+  int s1, s2, fin, rankS1, rankS2, rankFin;
 
   public runner(String firstName, String lastName, String bib) {
     this.firstName = firstName;
@@ -76,24 +140,10 @@ class runner {
     this.bib = bib;
   }
 
-  public String getFirstName() {
-    return firstName;
-  }
-
-  public void setFirstName(String firstName) {
-    this.firstName = firstName;
-  }
-
-  public String getLastName() {
-    return lastName;
-  }
-
-  public void setLastName(String lastName) {
-    this.lastName = lastName;
-  }
-
   private String getTimeString(int time) {
-    return "" + time / 100 + ":" + time % 100;
+    int seconds = time % 100;
+    int minutes = time / 100;
+    return String.format("%02d:%02d", minutes, seconds);
 
   }
 
@@ -122,14 +172,6 @@ class runner {
   public void setSplit2(String time) {
     String[] split = time.split(":");
     this.s2 = 100 * Integer.parseInt(split[0]) + Integer.parseInt(split[1]);
-  }
-
-  public String getBib() {
-    return bib;
-  }
-
-  public void setBib(String bib) {
-    this.bib = bib;
   }
 
   public String getName() {
