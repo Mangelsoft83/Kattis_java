@@ -16,7 +16,7 @@ public class palindromesubstring {
       if (!first)
         System.out.println();
 
-      Set<String> result = new HashSet<>(); // use Set to avoid duplicates
+      HashSet<String> result = new HashSet<>(); // use Set to avoid duplicates
       int n = s.length();
 
       for (int center = 0; center < 2 * n - 1; center++) {
