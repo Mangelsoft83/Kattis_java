@@ -1,10 +1,22 @@
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class tenKindsOfPeople {
   public static void main(String[] args) throws IOException {
 
+    try {
+      InputStream in = new FileInputStream("input.txt");
+      System.setIn(in); // from now on, System.in reads from file
+    } catch (FileNotFoundException e) {
+      System.err.println("Could not open debug input file: ");
+      e.printStackTrace();
+    }
     FastReaderTena in = new FastReaderTena();
 
     String[] rc_split = in.readLine().split(" ");

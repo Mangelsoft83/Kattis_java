@@ -1,10 +1,22 @@
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 
 public class raceday {
 
   public static void main(String[] args) throws IOException {
+    try {
+      InputStream in = new FileInputStream("input.txt");
+      System.setIn(in); // from now on, System.in reads from file
+    } catch (FileNotFoundException e) {
+      System.err.println("Could not open debug input file: ");
+      e.printStackTrace();
+    }
     FastReader in = new FastReader();
 
     List<String> input = new ArrayList<>();
@@ -20,7 +32,7 @@ public class raceday {
 
     while (idx < input.size() - 1) {
       List<Runner> runnerList = new ArrayList<>();
-      System.out.println(idx + " " + input.size());
+      // System.out.println(idx + " " + input.size());
       HashMap<String, Runner> byBib = new HashMap<>();
       if (!first) {
         System.out.println();
