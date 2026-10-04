@@ -1,4 +1,3 @@
-import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -10,84 +9,90 @@ public class rectsect {
   static HashMap<String, Integer> dict2values = new HashMap<>();
 
   public static void main(String[] args) throws IOException {
-    FastReaderRectSect fr = new FastReaderRectSect();
+    FastReader fr = new FastReader();
 
-    String line;
-    while ((line = fr.readLine()) != null) {
-      int c = Integer.parseInt(line);
+    int c = Integer.parseInt(fr.readLine());
+    for (int i = 0; i < c; i++) {
+      int N = Integer.parseInt(fr.readLine());
 
-      for (int i = 0; i < c; i++) {
-        int N = Integer.parseInt(fr.readLine());
+      List<int[]> rects = new ArrayList<>();
 
-        List<Rectangle> rects = new ArrayList<>();
-
-        for (int n = 0; n < N; n++) {
-          String[] split = fr.readLine().split(" ");
-          int left = Integer.parseInt(split[0]);
-          int top = Integer.parseInt(split[1]);
-          int right = Integer.parseInt(split[2]);
-          int bottom = Integer.parseInt(split[3]);
-
-          // normalize in case top > bottom
-          int x = Math.min(left, right);
-          int y = Math.min(top, bottom);
-          int width = Math.abs(right - left);
-          int height = Math.abs(bottom - top);
-
-          Rectangle r = new Rectangle(x, y, width, height);
-          rects.add(r);
-
+      for (int n = 0; n < N; n++) {
+        String[] split = fr.readLine().split(" ");
+        int[] rect = new int[4];
+        for (int j = 0; j < rect.length; j++) {
+          rect[j] = Integer.parseInt(split[j]);
         }
-
-        int overlap = 0;
-
-        Rectangle r = rects.getFirst();
-        for (int j = 1; j < rects.size(); j++) {
-          Rectangle rn = rects.get(j);
-          r = r.intersection(rn);
-        }
-
-        System.out.println(r.width * r.height);
-
+        rects.add(rect);
       }
 
+      System.out.println(intersectionArea(rects));
     }
 
   }
 
-}
+  static int intersectionArea(List<int[]> rectangles) {
+    int left = Integer.MIN_VALUE;
+    int top = Integer.MAX_VALUE;
+    int right = Integer.MAX_VALUE;
+    int bottom = Integer.MIN_VALUE;
 
-class FastReaderRectSect {
-  private final InputStream in = System.in;
-  private final byte[] buffer = new byte[1 << 16];
-  private int ptr = 0, len = 0;
-
-  public String readLine() throws IOException {
-    int c;
-    final StringBuilder sb = new StringBuilder();
-    boolean seenChar = false;
-
-    while ((c = read()) != -1) {
-      if (c == '\n')
-        break;
-      if (c == '\r')
-        continue; // skip carriage return
-      sb.append((char) c);
-      seenChar = true;
+    for (int[] r : rectangles) {
+      left = Math.max(left, r[0]);
+      top = Math.min(top, r[1]);
+      right = Math.min(right, r[2]);
+      bottom = Math.max(bottom, r[3]);
     }
 
-    if (!seenChar && c == -1)
-      return null; // true EOF
-    return sb.toString();
+    int width = Math.max(0, right - left);
+    int height = Math.max(0, top - bottom);
+
+    return width * height;
   }
 
-  private int read() throws IOException {
-    if (ptr >= len) {
-      ptr = 0;
-      len = in.read(buffer);
-      if (len <= 0)
-        return -1;
+  private static class FastReader {
+    private final InputStream in = System.in;
+    private final byte[] buffer = new byte[1 << 16];
+    private int ptr = 0;
+    private int len = 0;
+
+    public String readLine() throws IOException {
+      int c;
+      StringBuilder sb = new StringBuilder();
+      boolean seenChar = false;
+
+      while ((c = read()) != -1) {
+        if (c == '\n') {
+          break;
+        }
+
+        if (c == '\r') {
+          continue;
+        }
+
+        sb.append((char) c);
+        seenChar = true;
+      }
+
+      if (!seenChar && c == -1) {
+        return null;
+      }
+
+      return sb.toString();
     }
-    return buffer[ptr++];
+
+    private int read() throws IOException {
+      if (ptr >= len) {
+        ptr = 0;
+        len = in.read(buffer);
+
+        if (len <= 0) {
+          return -1;
+        }
+      }
+
+      return buffer[ptr++];
+    }
   }
+
 }
