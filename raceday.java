@@ -1,214 +1,161 @@
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class raceday {
 
   public static void main(String[] args) throws IOException {
-    try {
-      InputStream in = new FileInputStream("input.txt");
-      System.setIn(in); // from now on, System.in reads from file
-    } catch (FileNotFoundException e) {
-      System.err.println("Could not open debug input file: ");
-      e.printStackTrace();
+    FastReader fr = new FastReader();
+    class Runner {
+      String firstName;
+      String lastName;
+      String id;
+      String split1;
+      int s1;
+      int s2;
+      int fin;
+      String rank1;
+      String split2;
+      String rank2;
+      String finish;
+      String rank3;
     }
-    FastReader in = new FastReader();
 
-    List<String> input = new ArrayList<>();
+    int N = Integer.parseInt(fr.readLine());
 
-    String l;
-    while ((l = in.readLine()) != null) {
-      input.add(l);
-    }
+    while (true) {
 
-    boolean first = true;
+      Map<String, Runner> map = new HashMap<>(2 * N);
 
-    int idx = 0;
+      // read runners
+      for (int n = 0; n < N; n++) {
+        String[] split = fr.readLine().split(" ");
+        Runner r = new Runner();
+        r.firstName = split[0];
+        r.lastName = split[1];
+        r.id = split[2];
 
-    while (idx < input.size() - 1) {
-      List<Runner> runnerList = new ArrayList<>();
-      // System.out.println(idx + " " + input.size());
-      HashMap<String, Runner> byBib = new HashMap<>();
-      if (!first) {
-        System.out.println();
-        // idx--;
-      }
-      int N = Integer.parseInt(input.get(idx));
-
-      for (int i = 0; i < N; i++) {
-        String string = input.get(++idx);
-        int p1 = nextSpace(string, 0);
-        int p2 = nextSpace(string, p1 + 1);
-
-        String firstName = string.substring(0, p1);
-        String last = string.substring(p1 + 1, p2);
-        String bib = string.substring(p2 + 1);
-        // String[] split = string.split(" ");
-        // System.out.println(Arrays.toString(split));
-        Runner runner = new Runner(firstName, last, bib);
-        runnerList.add(runner);
-        byBib.put(bib, runner);
+        map.put(split[2], r);
       }
 
-      while (idx < input.size()) {
-        String string = input.get(++idx);
+      // read rounds
+      for (int n = 0; n < N * 3; n++) {
 
-        if (string.length() == 1)
-          break;
+        String[] split = fr.readLine().split(" ");
+        String id = split[0];
+        String pos = split[1];
+        String time = split[2];
 
-        int p1 = nextSpace(string, 0);
-        int p2 = nextSpace(string, p1 + 1);
+        Runner r = map.get(id);
 
-        String bib = string.substring(0, p1);
-        String location = string.substring(p1 + 1, p2);
-        String time = string.substring(p2 + 1);
-
-        Runner r = byBib.get(bib);
-
-        if (location.equals("S1")) {
-          r.setSplit1(time);
-        } else if (location.equals("S2")) {
-          r.setSplit2(time);
-        } else if (location.equals("F")) {
-          r.setFinal(time);
+        switch (pos) {
+          case "S1" -> {
+            r.split1 = time;
+          }
+          case "S2" -> {
+            r.split2 = time;
+          }
+          case "F" -> {
+            r.finish = time;
+          }
         }
-
       }
 
-      // Sorting
-      runnerList.sort(Comparator.comparing(Runner::getName));
+      // Ranking
 
-      List<Runner> s1List = new ArrayList<>(runnerList);
-      s1List.sort((a, b) -> Integer.compare(a.s1, b.s1));
+      List<Runner> runnerList = new ArrayList<>(map.values());
 
-      for (int i = 0; i < s1List.size(); i++) {
-        Runner r = s1List.get(i);
-        r.rankS1 = 1 + i;
+      for (Runner r : runnerList) {
+        String[] splitS1 = r.split1.split(":");
+        String[] splitS2 = r.split2.split(":");
+        String[] splitFin = r.finish.split(":");
+
+        r.s1 = Integer.parseInt(splitS1[0]) * 100 + Integer.parseInt(splitS1[1]);
+        r.s2 = Integer.parseInt(splitS2[0]) * 100 + Integer.parseInt(splitS2[1]);
+        r.fin = Integer.parseInt(splitFin[0]) * 100 + Integer.parseInt(splitFin[1]);
       }
 
-      int tempTime = -1;
-      int tempRank = -1;
-      for (Runner r : s1List) {
-        if (r.s1 == tempTime)
-          r.rankS1 = tempRank;
-        tempTime = r.s1;
-        tempRank = r.rankS1;
+      List<Runner> sorted = new ArrayList<>(runnerList);
+      sorted.sort(Comparator.comparing((Runner r) -> r.s1));
+
+      int last = 0;
+      for (int n = 0; n < N; n++) {
+        int time = sorted.get(n).s1;
+
+        if (time == last)
+          sorted.get(n).rank1 = "" + n;
+        else
+          sorted.get(n).rank1 = "" + (n + 1);
+
+        last = time;
       }
 
-      List<Runner> s2List = new ArrayList<>(runnerList);
-      s2List.sort((a, b) -> Integer.compare(a.s2, b.s2));
+      sorted.sort(Comparator.comparing((Runner r) -> r.s2));
 
-      for (int i = 0; i < s2List.size(); i++) {
-        Runner r = s2List.get(i);
-        r.rankS2 = 1 + i;
+      last = 0;
+      for (int n = 0; n < N; n++) {
+        int time = sorted.get(n).s2;
+
+        if (time == last)
+          sorted.get(n).rank2 = "" + n;
+        else
+          sorted.get(n).rank2 = "" + (n + 1);
+
+        last = time;
       }
 
-      tempTime = -1;
-      tempRank = -1;
-      for (Runner r : s2List) {
-        if (r.s2 == tempTime)
-          r.rankS2 = tempRank;
-        tempTime = r.s2;
-        tempRank = r.rankS2;
+      sorted.sort(Comparator.comparing((Runner r) -> r.fin));
+
+      last = 0;
+      for (int n = 0; n < N; n++) {
+        int time = sorted.get(n).fin;
+
+        if (time == last)
+          sorted.get(n).rank3 = "" + n;
+        else
+          sorted.get(n).rank3 = "" + (n + 1);
+
+        last = time;
       }
 
-      List<Runner> finList = new ArrayList<>(runnerList);
-      finList.sort((a, b) -> Integer.compare(a.fin, b.fin));
+      runnerList.sort(
+          Comparator.comparing((Runner r) -> r.lastName)
+              .thenComparing(r -> r.firstName));
+      // print
+      String format = "%-20s%10s%10s%10s%10s%10s%10s%10s%n";
 
-      for (int i = 0; i < finList.size(); i++) {
-        Runner r = finList.get(i);
-        r.rankFin = 1 + i;
-      }
-
-      tempTime = -1;
-      tempRank = -1;
-      for (Runner r : finList) {
-        if (r.fin == tempTime)
-          r.rankFin = tempRank;
-        tempTime = r.fin;
-        tempRank = r.rankFin;
-      }
-
-      // printing
-      String fmt = "%-25s %4s %9s %9s %9s %9s %9s %9s%n";
-      String fmt2 = "%-24s %4s %9s %9s %9s %9s %9s %9s%n";
-      System.out.printf(fmt, "NAME", "BIB", "SPLIT1", "RANK", "SPLIT2", "RANK", "FINISH", "RANK");
+      System.out.printf(
+          format,
+          "NAME", "BIB", "SPLIT1", "RANK",
+          "SPLIT2", "RANK", "FINISH", "RANK");
 
       for (Runner r : runnerList) {
         System.out.printf(
-            fmt2,
-            r.getName(), r.bib, r.getSplit1(), r.rankS1, r.getSplit2(), r.rankS2, r.getFinal(), r.rankFin);
+            format,
+            r.lastName + ", " + r.firstName,
+            r.id,
+            r.split1,
+            r.rank1,
+            r.split2,
+            r.rank2,
+            r.finish,
+            r.rank3);
       }
 
-      // N = Integer.parseInt(split[0]);
+      System.out.println();
 
-      first = false;
-    }
-    System.out.println();
+      N = Integer.parseInt(fr.readLine());
 
-  }
+      if (N == 0) {
+        System.out.println();
+        break;
 
-  private static int nextSpace(String s, int from) {
-    int n = s.length();
-    for (int i = from; i < n; i++)
-      if (s.charAt(i) == ' ')
-        return i;
-    return n; // not found (caller expects well-formed input)
-  }
+      }
 
-  private static int parseMMSS(String s) {
-    String[] t = s.split(":");
-    int m = Integer.parseInt(t[0]);
-    int sec = Integer.parseInt(t[1]);
-    return m * 60 + sec; // store as total seconds (correct numeric ordering)
-  }
-
-  private static String toMMSS(int totalSeconds) {
-    int m = totalSeconds / 60, s = totalSeconds % 60;
-    return String.format("%02d:%02d", m, s);
-  }
-
-  private static class Runner {
-    String firstName, lastName, bib;
-    int s1, s2, fin, rankS1, rankS2, rankFin;
-
-    public Runner(String firstName, String lastName, String bib) {
-      this.firstName = firstName;
-      this.lastName = lastName;
-      this.bib = bib;
-    }
-
-    public String getSplit1() {
-      return toMMSS(s1);
-    }
-
-    public String getSplit2() {
-      return toMMSS(s2);
-    }
-
-    public String getFinal() {
-      return toMMSS(fin);
-    }
-
-    public void setSplit1(String time) {
-      this.s1 = parseMMSS(time);
-    }
-
-    public void setFinal(String time) {
-      this.fin = parseMMSS(time);
-    }
-
-    public void setSplit2(String time) {
-      this.s2 = parseMMSS(time);
-    }
-
-    public String getName() {
-      return lastName + ", " + firstName;
     }
 
   }
@@ -216,24 +163,31 @@ public class raceday {
   private static class FastReader {
     private final InputStream in = System.in;
     private final byte[] buffer = new byte[1 << 16];
-    private int ptr = 0, len = 0;
+    private int ptr = 0;
+    private int len = 0;
 
     public String readLine() throws IOException {
       int c;
-      final StringBuilder sb = new StringBuilder();
+      StringBuilder sb = new StringBuilder();
       boolean seenChar = false;
 
       while ((c = read()) != -1) {
-        if (c == '\n')
+        if (c == '\n') {
           break;
-        if (c == '\r')
-          continue; // skip carriage return
+        }
+
+        if (c == '\r') {
+          continue;
+        }
+
         sb.append((char) c);
         seenChar = true;
       }
 
-      if (!seenChar && c == -1)
-        return null; // true EOF
+      if (!seenChar && c == -1) {
+        return null;
+      }
+
       return sb.toString();
     }
 
@@ -241,10 +195,14 @@ public class raceday {
       if (ptr >= len) {
         ptr = 0;
         len = in.read(buffer);
-        if (len <= 0)
+
+        if (len <= 0) {
           return -1;
+        }
       }
+
       return buffer[ptr++];
     }
   }
+
 }
