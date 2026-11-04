@@ -5,63 +5,54 @@ import java.util.*;
 public class selectgroup {
   private static final HashMap<String, HashSet<String>> groupMap = new HashMap<>();
 
+  private static String[] tokens;
+  private static int ind;
+
   // https://open.kattis.com/problems/classpicture
+  // Recursive desent parser
   private static HashSet<String> union(HashSet<String> S1, HashSet<String> S2) {
     HashSet<String> s = new HashSet<>(S1);
-
-    //System.out.println("union " + S1.toString() + S2.toString());
     s.addAll(S2);
     return s;
   }
 
   private static HashSet<String> difference(HashSet<String> S1, HashSet<String> S2) {
     HashSet<String> s = new HashSet<>(S1);
-    //System.out.println("difference " + S1.toString() + S2.toString());
     s.removeAll(S2);
     return s;
   }
 
   private static HashSet<String> intersection(HashSet<String> S1, HashSet<String> S2) {
     HashSet<String> s1 = new HashSet<>(S1);
-    //System.out.println("intersection " + S1.toString() + S2.toString());
     s1.retainAll(S2);
     return s1;
   }
 
-  private static HashSet<String> find(String[] query, int index, String opp) {
+  private static HashSet<String> find() {
+    String t = tokens[ind];
+    ind++;
 
-    if(index +1 >= query.length) return groupMap.getOrDefault(opp,new HashSet<>(1));
-    String key1 = query[index + 1];
+    switch (t) {
 
-    //use last opperation
-    while (key1.equals("union") || key1.endsWith("intersection") || key1.equals("difference")) {
-      index++;
-      if(index >= query.length) return new HashSet<>();
-
-      opp = query[index];
-      key1 = query[index + 1];
-    }    
-
-    HashSet<String> s1 = groupMap.getOrDefault(key1, new HashSet<String>());
-
-    if(index+2 >= query.length) return s1;
-    String key2 = query[index + 2];
-    //HashSet<String> s2 = groupMap.getOrDefault(key2, find(query,index+2, query[index + 2]));
-    HashSet<String> s2 = groupMap.get(key2);
-    if(s2==null) s2 = find(query,index+2, query[index + 2]);
-
-    switch (opp) {
       case "union" -> {
+        HashSet<String> s1 = find();
+        HashSet<String> s2 = find();
         return union(s1, s2);
       }
       case "difference" -> {
+        HashSet<String> s1 = find();
+        HashSet<String> s2 = find();
         return difference(s1, s2);
       }
       case "intersection" -> {
+        HashSet<String> s1 = find();
+        HashSet<String> s2 = find();
         return intersection(s1, s2);
       }
+      default -> {
+        return groupMap.getOrDefault(t, new HashSet<>());
+      }
     }
-    return new HashSet<>();
   }
 
   public static void main(String[] args) throws IOException {
@@ -84,9 +75,11 @@ public class selectgroup {
           }
           groupMap.put(name, set);
         }
-        case "union", "intersection", "difference" -> {
+        default -> {
+          tokens = query;
+          ind = 0;
 
-          TreeSet<String> hashSet = new TreeSet<>(find(query,0, opp));
+          TreeSet<String> hashSet = new TreeSet<>(find());
 
           System.out.println(String.join(" ", hashSet));
         }
