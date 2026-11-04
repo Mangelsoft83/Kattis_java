@@ -1,2 +1,5 @@
-*.class
-*.txt
+.idea/*
+out/*
+Kattis_java.iml
+input*
+output*
